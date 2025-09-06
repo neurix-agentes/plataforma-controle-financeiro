@@ -1,0 +1,32 @@
+{
+  "name": "Ultra Finanças",
+  "description": "Plataforma de controle financeiro pessoal",
+  "repository": "https://github.com/seu-usuario/ultra-financas",
+  "keywords": ["flask", "python", "financas", "supabase"],
+  "env": {
+    "SUPABASE_URL": {
+      "description": "URL do projeto Supabase"
+    },
+    "SUPABASE_ANON_KEY": {
+      "description": "Chave anônima do Supabase"
+    },
+    "SUPABASE_SERVICE_KEY": {
+      "description": "Chave de serviço do Supabase"
+    },
+    "FLASK_DEBUG": {
+      "description": "Debug mode for Flask",
+      "value": "False"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
