@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Ultra Finanças</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        .transaction {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .entrada { color: #059669; }
+        .saida { color: #dc2626; }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .error {
+            color: #dc2626;
+            background: #fef2f2;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #059669;
+            background: #f0fdf4;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏦 Ultra Finanças - Teste da API</h1>
+    
+    <div class="container">
+        <h2>📊 Dashboard</h2>
+        <div id="dashboard-stats" class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="saldo-total">-</div>
+                <div class="stat-label">Saldo Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value entrada" id="entradas-mes">-</div>
+                <div class="stat-label">Entradas do Mês</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value saida" id="saidas-mes">-</div>
+                <div class="stat-label">Saídas do Mês</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="resultado-mensal">-</div>
+                <div class="stat-label">Resultado Mensal</div>
+            </div>
+        </div>
+        
+        <button onclick="loadDashboard()">🔄 Atualizar Dashboard</button>
+        <button onclick="loadDashboard(1, 2025)">📅 Janeiro 2025</button>
+    </div>
+
+    <div class="container">
+        <h2>💰 Transações Recentes</h2>
+        <div id="transactions"></div>
+        <button onclick="loadTransactions()">🔄 Carregar Transações</button>
+    </div>
+
+    <div class="container">
+        <h2>📋 Categorias</h2>
+        <div id="categories"></div>
+        <button onclick="loadCategories()">🔄 Carregar Categorias</button>
+    </div>
+
+    <div id="messages"></div>
+
+    <script>
+        const API_BASE = '/api';
+
+        function showMessage(message, type = 'success') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 5000);
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        async function loadDashboard(mes = null, ano = null) {
+            try {
+                let url = `${API_BASE}/dashboard`;
+                if (mes && ano) {
+                    url += `?mes=${mes}&ano=${ano}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('saldo-total').textContent = formatCurrency(data.saldo_total);
+                    document.getElementById('entradas-mes').textContent = formatCurrency(data.entradas_mes);
+                    document.getElementById('saidas-mes').textContent = formatCurrency(data.saidas_mes);
+                    document.getElementById('resultado-mensal').textContent = formatCurrency(data.resultado_mensal);
+                    
+                    showMessage('Dashboard atualizado!');
+                } else {
+                    showMessage(`Erro: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`Erro de conexão: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadTransactions() {
+            try {
+                const response = await fetch(`${API_BASE}/transacoes`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const transactionsDiv = document.getElementById('transactions');
+                    transactionsDiv.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        transactionsDiv.innerHTML = '<p>Nenhuma transação encontrada.</p>';
+                    } else {
+                        data.forEach(transaction => {
+                            const transactionDiv = document.createElement('div');
+                            transactionDiv.className = 'transaction';
+                            transactionDiv.innerHTML = `
+                                <div>
+                                    <strong>${transaction.descricao}</strong><br>
+                                    <small>${transaction.data_transacao}</small>
+                                </div>
+                                <div class="${transaction.tipo}">
+                                    ${formatCurrency(transaction.valor)}
+                                </div>
+                            `;
+                            transactionsDiv.appendChild(transactionDiv);
+                        });
+                    }
+                    
+                    showMessage(`${data.length} transações carregadas!`);
+                } else {
+                    showMessage(`Erro: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`Erro de conexão: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_BASE}/categorias`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const categoriesDiv = document.getElementById('categories');
+                    categoriesDiv.innerHTML = '';
+                    
+                    const receitas = data.filter(cat => cat.tipo === 'Receita');
+                    const despesas = data.filter(cat => cat.tipo === 'Despesa');
+                    
+                    categoriesDiv.innerHTML = `
+                        <h3>💰 Receitas (${receitas.length})</h3>
+                        ${receitas.map(cat => `<span style="margin: 2px; padding: 4px 8px; background: #dcfce7; border-radius: 4px; font-size: 12px;">${cat.icone} ${cat.nome}</span>`).join(' ')}
+                        
+                        <h3 style="margin-top: 20px;">💸 Despesas (${despesas.length})</h3>
+                        ${despesas.map(cat => `<span style="margin: 2px; padding: 4px 8px; background: #fee2e2; border-radius: 4px; font-size: 12px;">${cat.icone} ${cat.nome}</span>`).join(' ')}
+                    `;
+                    
+                    showMessage(`${data.length} categorias carregadas!`);
+                } else {
+                    showMessage(`Erro: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`Erro de conexão: ${error.message}`, 'error');
+            }
+        }
+
+        // Carregar dados iniciais
+        window.onload = function() {
+            loadDashboard(1, 2025); // Janeiro 2025 onde temos dados de teste
+            loadTransactions();
+            loadCategories();
+        };
+    </script>
+</body>
+</html>

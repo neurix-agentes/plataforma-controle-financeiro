@@ -17,9 +17,9 @@ def get_user_token():
 
 def get_user_id():
     """Obtém o ID do usuário autenticado"""
-    # Por enquanto, retorna um ID fixo para teste
+    # Por enquanto, retorna um UUID fixo válido para teste
     # Em produção, isso deve ser extraído do token JWT
-    return "user_123"
+    return "550e8400-e29b-41d4-a716-446655440000"
 
 # Rotas para Contas
 @financial_bp.route("/contas", methods=["GET"])
@@ -174,10 +174,10 @@ def get_transacoes():
 @financial_bp.route("/transacoes", methods=["POST"])
 def create_transacao():
     try:
-        user_id = get_user_id()
         user_token = get_user_token()
         data = request.get_json()
-        data["user_id"] = user_id
+        # Por enquanto, não exigir user_id para testes
+        # data["user_id"] = get_user_id()
         
         # Extrair mês e ano da data da transação
         data_transacao = datetime.strptime(data["data_transacao"], "%Y-%m-%d").date()

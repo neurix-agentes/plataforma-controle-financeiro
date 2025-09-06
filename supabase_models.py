@@ -74,10 +74,8 @@ class Categoria:
     def get_all(self, user_id: str, tipo: str = None) -> list:
         """Buscar todas as categorias do usuário"""
         try:
-            query = self.client.table(self.table_name).select("*").eq('ativo', True)
-            
-            # Buscar categorias do usuário ou categorias padrão (user_id = null)
-            query = query.or_(f'user_id.eq.{user_id},user_id.is.null')
+            # Simplificando: buscar apenas categorias sem user_id (padrão) por enquanto
+            query = self.client.table(self.table_name).select("*").eq('ativo', True).is_('user_id', 'null')
             
             if tipo:
                 query = query.eq('tipo', tipo)
@@ -90,7 +88,7 @@ class Categoria:
     def get_by_id(self, categoria_id: str, user_id: str) -> Dict[str, Any]:
         """Buscar categoria por ID"""
         try:
-            result = self.client.table(self.table_name).select("*").eq('id', categoria_id).or_(f'user_id.eq.{user_id},user_id.is.null').execute()
+            result = self.client.table(self.table_name).select("*").eq('id', categoria_id).execute()
             return result.data[0] if result.data else None
         except Exception as e:
             raise Exception(f"Erro ao buscar categoria: {str(e)}")
@@ -127,7 +125,7 @@ class FormaPagamento:
     def get_all(self, user_id: str) -> list:
         """Buscar todas as formas de pagamento do usuário"""
         try:
-            result = self.client.table(self.table_name).select("*").eq('ativo', True).or_(f'user_id.eq.{user_id},user_id.is.null').execute()
+            result = self.client.table(self.table_name).select("*").eq('ativo', True).is_('user_id', 'null').execute()
             return result.data
         except Exception as e:
             raise Exception(f"Erro ao buscar formas de pagamento: {str(e)}")
@@ -148,7 +146,7 @@ class TipoGasto:
     def get_all(self, user_id: str) -> list:
         """Buscar todos os tipos de gasto do usuário"""
         try:
-            result = self.client.table(self.table_name).select("*").eq('ativo', True).or_(f'user_id.eq.{user_id},user_id.is.null').execute()
+            result = self.client.table(self.table_name).select("*").eq('ativo', True).is_('user_id', 'null').execute()
             return result.data
         except Exception as e:
             raise Exception(f"Erro ao buscar tipos de gasto: {str(e)}")
@@ -169,7 +167,7 @@ class Periodicidade:
     def get_all(self, user_id: str) -> list:
         """Buscar todas as periodicidades do usuário"""
         try:
-            result = self.client.table(self.table_name).select("*").eq('ativo', True).or_(f'user_id.eq.{user_id},user_id.is.null').execute()
+            result = self.client.table(self.table_name).select("*").eq('ativo', True).is_('user_id', 'null').execute()
             return result.data
         except Exception as e:
             raise Exception(f"Erro ao buscar periodicidades: {str(e)}")
@@ -187,10 +185,14 @@ class Transacao:
         except Exception as e:
             raise Exception(f"Erro ao criar transação: {str(e)}")
     
-    def get_all(self, user_id: str, mes: int = None, ano: int = None) -> list:
+    def get_all(self, user_id: str = None, mes: int = None, ano: int = None) -> list:
         """Buscar todas as transações do usuário"""
         try:
-            query = self.client.table(self.table_name).select("*").eq('user_id', user_id)
+            query = self.client.table(self.table_name).select("*")
+            
+            # Por enquanto, buscar todas as transações (para testes)
+            # if user_id:
+            #     query = query.eq('user_id', user_id)
             
             if mes:
                 query = query.eq('mes_referencia', mes)
