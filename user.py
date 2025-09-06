@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from src.models.supabase_models import Auth
+from supabase_models import Auth
 
 user_bp = Blueprint("user", __name__)
 

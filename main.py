@@ -2,10 +2,10 @@ import os
 import sys
 from flask import Flask, send_from_directory, request, jsonify
 from flask_cors import CORS
-from src.routes.user import user_bp
-from src.routes.financial import financial_bp
-from src.routes.seed_data import seed_bp
-from src.config.supabase import get_supabase_admin
+from user import user_bp
+from financial_routes import financial_bp
+from seed_data import seed_bp
+from supabase_config import get_supabase_admin
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'

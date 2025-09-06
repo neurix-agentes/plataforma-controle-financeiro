@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, g, request
-from src.models.supabase_models import Conta, Categoria, FormaPagamento, TipoGasto, Periodicidade
+from supabase_models import Conta, Categoria, FormaPagamento, TipoGasto, Periodicidade
 
 seed_bp = Blueprint("seed", __name__)
 

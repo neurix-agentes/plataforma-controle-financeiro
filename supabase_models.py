@@ -1,6 +1,6 @@
 from datetime import datetime, date
 from typing import Optional, Dict, Any
-from src.config.supabase import get_supabase_admin, get_supabase_client
+from supabase_config import get_supabase_admin, get_supabase_client
 import uuid
 
 class SupabaseModel:
